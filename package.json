@@ -1,0 +1,26 @@
+{
+  "name": "vary-ocean-flow-fish",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@dimforge/rapier3d-compat": "^0.19.3",
+    "@react-oauth/google": "^0.13.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "gsap": "^3.15.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "stats-gl": "^4.0.2",
+    "styled-components": "^6.4.3",
+    "three": "^0.183.2",
+    "tldraw": "^5.1.1"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}

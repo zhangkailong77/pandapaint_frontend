@@ -1,0 +1,1341 @@
+/* ==========================================
+   1. 全局变量与基础重置
+   ========================================== */
+:root {
+  --bg-color: #f4f4f5;
+  --panel-bg: #ffffff;
+  --text-primary: #1e1e1f;
+  --text-secondary: #626264;
+  --border-color: #e4e4e7;
+  --accent-color: #3b82f6;
+  --toolbar-bg: #1e1e1f;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+body.workbench-route,
+html.workbench-route {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-color);
+}
+
+/* ==========================================
+   2. 工作台主框架与悬浮组件
+   ========================================== */
+.lovart-workbench {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  background-color: var(--bg-color) !important;
+}
+
+/* 顶部左侧悬浮项目名下拉菜单 */
+.lovart-floating-header {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 100;
+  background-color: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  padding: 8px 14px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.project-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.project-icon {
+  font-size: 14px;
+}
+
+.dropdown-arrow {
+  font-size: 9px;
+  color: var(--text-secondary);
+  margin-left: 2px;
+}
+
+/* 顶部右侧悬浮状态栏 */
+.lovart-floating-stats {
+  position: absolute;
+  top: 16px;
+  right: 424px; /* 避开右侧面板 400px 宽度及间距 */
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.thunder-icon {
+  color: #f59e0b;
+}
+
+.user-avatar-placeholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--accent-color);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* ==========================================
+   3. 舞台与画布外壳（彻底阻断底色穿透）
+   ========================================== */
+.lovart-stage {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.lovart-canvas-shell {
+  flex: 1;
+  position: relative;
+  height: 100%;
+  width: 100%;
+  background-color: var(--bg-color) !important;
+  overflow: hidden;
+}
+
+/* 覆盖 tldraw 内部默认背景，保持实体纯色 */
+.tl-container {
+  background-color: var(--bg-color) !important;
+}
+
+/* ==========================================
+   4. 底部暗色胶囊工具栏
+   ========================================== */
+.lovart-floating-toolbar {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  background-color: var(--toolbar-bg);
+  padding: 6px;
+  border-radius: 12px;
+  display: flex;
+  gap: 6px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  align-items: center;
+}
+
+.lovart-toolbar-item {
+  background: transparent;
+  border: none;
+  color: #a1a1aa;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lovart-toolbar-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.lovart-toolbar-item.is-active {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.lovart-toolbar-item.is-active .tool-icon {
+  transform: scale(1.05);
+}
+
+.tool-icon {
+  font-size: 16px;
+  transition: transform 0.15s ease;
+}
+
+/* ==========================================
+   5. 右侧面板整体框架
+   ========================================== */
+.lovart-right-sidebar {
+  width: 400px;
+  min-width: 400px;
+  border-left: 1px solid var(--border-color);
+  background-color: var(--panel-bg) !important;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  z-index: 10;
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.02);
+  position: relative;
+}
+
+/* ==========================================
+   6. 对话历史展示区
+   ========================================== */
+.meta-btn svg,
+.action-tool-btn svg,
+.send-prompt-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.send-prompt-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* ==========================================
+   7. 对话历史展示区
+   ========================================== */
+.lovart-chat-history {
+  flex: 1;
+  padding: 20px 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.history-date-divider {
+  text-align: center;
+  font-size: 11px;
+  color: #a1a1aa;
+  margin: 8px 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.history-date-divider::before,
+.history-date-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background-color: #f1f1f4;
+}
+
+.chat-bubble-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-bubble-item.user {
+  align-items: flex-end;
+}
+
+.chat-bubble-item.assistant {
+  align-items: flex-start;
+}
+
+.message-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.user-message-wrapper {
+  background-color: #f4f4f5;
+  padding: 10px 14px;
+  border-radius: 12px 12px 2px 12px;
+  max-width: 85%;
+}
+
+.bot-message-wrapper {
+  background-color: transparent;
+  max-width: 100%;
+}
+
+.bot-message-wrapper.is-image {
+  width: min(100%, 260px);
+}
+
+.assistant-loading-wrapper {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 6px 0;
+}
+
+.chat-loading-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chat-loading-dots span {
+  width: 7px;
+  height: 7px;
+  background: #a1a1aa;
+  border-radius: 50%;
+  animation: chat-dot-bounce 1.15s infinite ease-in-out;
+}
+
+.chat-loading-dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.chat-loading-dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.assistant-image-card {
+  overflow: hidden;
+  border: 1px solid #ececf0;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+.assistant-image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.assistant-image-actions {
+  display: flex;
+  gap: 12px;
+  padding: 10px 12px 12px;
+}
+
+.chat-reference-preview {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid #ececf0;
+  border-radius: 12px;
+  background: #fafafa;
+}
+
+.chat-reference-preview img {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.chat-reference-preview strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+.chat-reference-preview span {
+  display: block;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.message-markdown h2,
+.message-markdown h3,
+.message-markdown h4,
+.message-markdown h5,
+.message-markdown h6,
+.message-markdown p,
+.message-markdown ul,
+.message-markdown ol,
+.message-markdown blockquote,
+.message-markdown pre,
+.message-markdown table {
+  margin: 0;
+}
+
+.message-markdown {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--text-primary);
+}
+
+.message-markdown h2,
+.message-markdown h3,
+.message-markdown h4,
+.message-markdown h5,
+.message-markdown h6 {
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+
+.message-markdown h2 { font-size: 18px; }
+.message-markdown h3 { font-size: 16px; }
+.message-markdown h4 { font-size: 15px; }
+.message-markdown h5,
+.message-markdown h6 { font-size: 14px; }
+
+.message-markdown p,
+.message-markdown li,
+.message-markdown blockquote,
+.message-markdown td,
+.message-markdown th {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.message-markdown ul,
+.message-markdown ol {
+  padding-left: 20px;
+}
+
+.message-markdown blockquote {
+  padding: 4px 10px;
+  border-left: 3px solid #d4d4d8;
+  color: var(--text-secondary);
+}
+
+.message-markdown a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.message-markdown pre {
+  overflow-x: auto;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #18181b;
+  color: #f4f4f5;
+}
+
+.message-markdown pre code {
+  padding: 0;
+  font-size: 12px;
+  background: transparent;
+  color: inherit;
+  white-space: pre;
+}
+
+.message-markdown code {
+  padding: 1px 5px;
+  font-size: 12px;
+  background: #f4f4f5;
+  border-radius: 6px;
+}
+
+.message-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.message-markdown th,
+.message-markdown td {
+  padding: 5px 7px;
+  border: 1px solid #e4e4e7;
+  text-align: left;
+}
+
+.message-markdown th {
+  background: #fafafa;
+  font-weight: 600;
+}
+
+.message-markdown input[type="checkbox"] {
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.copy-feedback {
+  align-self: center;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.assistant-image-actions {
+  display: flex;
+  gap: 12px;
+  padding: 10px 12px 12px;
+}
+
+.chat-reference-preview {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid #ececf0;
+  border-radius: 12px;
+  background: #fafafa;
+}
+
+.chat-reference-preview img {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.chat-reference-preview strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+.chat-reference-preview span {
+  display: block;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.message-meta-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.meta-btn {
+  background: transparent;
+  border: none;
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.meta-btn:hover {
+  color: var(--text-primary);
+}
+
+.message-error {
+  color: #b42318;
+}
+
+.meta-btn-retry {
+  color: #2563eb;
+}
+
+.meta-btn-retry:hover {
+  color: #1d4ed8;
+}
+
+.meta-btn-retry:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+/* ==========================================
+   8. 底部对话输入面板
+   ========================================== */
+.lovart-chat-composer {
+  border-top: 1px solid var(--border-color);
+  background-color: var(--panel-bg);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chat-input-wrapper {
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 10px 12px 8px;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
+}
+
+.chat-input-wrapper.is-dragging-attachments {
+  border-color: var(--accent-color);
+  background-color: #f8fbff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.chat-textarea {
+  border: none;
+  resize: none;
+  outline: none;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: transparent;
+  width: 100%;
+  line-height: 1.5;
+  min-height: 52px;
+  max-height: 220px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.chat-textarea::placeholder {
+  color: #a1a1aa;
+}
+
+.chat-toolbar-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #f4f4f5;
+}
+
+.chat-tools-left,
+.chat-tools-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.action-tool-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 14px;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s;
+}
+
+.action-tool-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
+}
+
+.chat-attachment-input {
+  display: none;
+}
+
+.chat-attachment-previews {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chat-attachment-preview {
+  position: relative;
+  width: 52px;
+  height: 52px;
+}
+
+.chat-attachment-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 1px solid #ececf0;
+  border-radius: 10px;
+}
+
+.chat-attachment-remove {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 17px;
+  height: 17px;
+  padding: 0;
+  border: 1px solid #ffffff;
+  border-radius: 50%;
+  background: #3f3f46;
+  color: #ffffff;
+  font-size: 15px;
+  line-height: 13px;
+  cursor: pointer;
+}
+
+/* Agent 胶囊选择器 */
+.agent-selector {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  background-color: #ffffff;
+  user-select: none;
+  transition: background-color 0.15s;
+}
+
+.agent-selector:hover {
+  background-color: #f4f4f5;
+}
+
+.agent-indicator {
+  width: 6px;
+  height: 6px;
+  background-color: var(--accent-color);
+  border-radius: 50%;
+}
+
+.arrow {
+  font-size: 8px;
+  color: #a1a1aa;
+}
+
+/* 发送按钮 */
+.send-prompt-btn {
+  background-color: #1e1e1f;
+  color: #ffffff;
+  border: none;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.15s, transform 0.1s;
+}
+
+.send-prompt-btn:hover {
+  background-color: #3f3f46;
+}
+
+.send-prompt-btn:active {
+  transform: scale(0.95);
+}
+
+.send-prompt-btn:disabled {
+  background-color: var(--border-color);
+  color: #a1a1aa;
+  cursor: not-allowed;
+}
+
+/* ==========================================
+   9. 跳过提示横幅
+   ========================================== */
+.lovart-skipped-records {
+  position: absolute;
+  bottom: 80px;
+  right: 16px;
+  background-color: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.tlui-style-panel.tlui-style-panel__wrapper:has(.cowart-ai-image-style-panel) {
+  width: min(240px, calc(100vw - 24px)) !important;
+  max-width: min(240px, calc(100vw - 24px)) !important;
+}
+
+.cowart-ai-image-style-panel {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  gap: 18px;
+  border-top: 1px solid var(--tl-color-divider);
+}
+
+.cowart-ai-style-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cowart-ai-style-heading {
+  display: inline-flex;
+  align-items: center;
+  color: var(--tl-color-text);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.cowart-ai-size-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.cowart-ai-size-field {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  height: 36px;
+  padding: 0 10px;
+  align-items: center;
+  gap: 7px;
+  background: var(--tl-color-muted-2);
+  border: 1px solid transparent;
+  border-radius: var(--tl-radius-2);
+}
+
+.cowart-ai-size-field:focus-within {
+  background: #fff;
+  border-color: #2f80ed;
+  box-shadow: 0 0 0 2px rgb(47 128 237 / 14%);
+}
+
+.cowart-ai-size-field span {
+  color: var(--tl-color-text-2);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.cowart-ai-size-field input {
+  min-width: 0;
+  padding: 0;
+  color: var(--tl-color-text);
+  font: inherit;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  background: transparent;
+  border: 0;
+  outline: 0;
+}
+
+.cowart-ai-aspect-lock {
+  display: grid;
+  width: 24px;
+  height: 32px;
+  padding: 0;
+  place-items: center;
+  color: var(--tl-color-text-2);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--tl-radius-2);
+  cursor: pointer;
+}
+
+.cowart-ai-aspect-lock:hover {
+  background: #f1f3f5;
+  color: #25282d;
+}
+
+.cowart-ai-lock-icon {
+  display: block;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cowart-ai-aspect-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.cowart-ai-aspect-preset {
+  display: grid;
+  grid-template-rows: 22px auto;
+  min-height: 54px;
+  padding: 7px 6px 6px;
+  place-items: center;
+  gap: 5px;
+  color: var(--tl-color-text);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  background: var(--tl-color-panel);
+  border: 1px solid var(--tl-color-muted-1);
+  border-radius: var(--tl-radius-2);
+  cursor: pointer;
+}
+
+.cowart-ai-aspect-preset:hover {
+  background: var(--tl-color-muted-2);
+  border-color: var(--tl-color-muted-1);
+}
+
+.cowart-ai-aspect-preset[aria-pressed="true"] {
+  color: #2f80ed;
+  border-color: #2f80ed;
+  box-shadow: inset 0 0 0 1px #2f80ed;
+}
+
+.cowart-ai-aspect-preset[aria-pressed="true"] .cowart-ai-aspect-icon {
+  border-color: #2f80ed;
+}
+
+.cowart-ai-aspect-icon {
+  display: block;
+  border: 2px solid var(--tl-color-text);
+  border-radius: 4px;
+}
+
+@keyframes chat-dot-bounce {
+  0%, 80%, 100% {
+    transform: scale(0.72);
+    opacity: 0.35;
+  }
+
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 隐藏 tldraw 自带的箭线条，由 ComfyLinesOverlay SVG 接管渲染 */
+.tl-shape[data-shape-type="arrow"] {
+  display: none !important;
+}
+
+/* iOS 亮色通知中心毛玻璃拟态卡片 */
+.lovart-prompt-inspector {
+  width: 480px;
+  background: rgba(242, 242, 247, 0.76) !important;
+  backdrop-filter: blur(30px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.65) !important;
+  border-radius: 24px !important;
+  padding: 14px 18px !important;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.12),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8) !important;
+  color: #000000 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "PingFang SC", sans-serif !important;
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 顶部 iOS 灰半透明胶囊按钮 */
+.inspector-top-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.inspector-chip-btn {
+  background: rgba(120, 120, 128, 0.12) !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  color: #1c1c1e !important;
+  padding: 5px 12px !important;
+  border-radius: 20px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  cursor: pointer;
+  backdrop-filter: blur(10px) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.inspector-chip-btn:hover {
+  background: rgba(120, 120, 128, 0.22) !important;
+  color: #000000 !important;
+  transform: translateY(-1px);
+}
+
+/* 自适应高度文本框与美化滚动条 */
+.inspector-textarea {
+  width: 100%;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  color: #000000 !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  resize: none !important;
+  line-height: 1.55 !important;
+  letter-spacing: -0.01em;
+  font-family: inherit !important;
+
+  /* 自适应高度核心控制 */
+  min-height: 48px !important;
+  max-height: 150px !important;
+  overflow-y: auto !important;
+  padding-right: 4px;
+}
+
+.inspector-textarea::placeholder {
+  color: rgba(60, 60, 67, 0.55) !important;
+}
+
+/* iOS 风格 4px 极细半透明滚动条 */
+.inspector-textarea::-webkit-scrollbar {
+  width: 4px;
+}
+
+.inspector-textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.inspector-textarea::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 4px;
+}
+
+.inspector-textarea::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* 底部分隔线与参数栏 */
+.inspector-bottom-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(60, 60, 67, 0.12) !important;
+}
+
+.inspector-params {
+  display: flex;
+  gap: 8px;
+}
+
+.param-tag {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: rgba(60, 60, 67, 0.85) !important;
+  background: rgba(120, 120, 128, 0.1) !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  padding: 4px 10px !important;
+  border-radius: 12px !important;
+  cursor: pointer;
+  backdrop-filter: blur(8px) !important;
+  transition: all 0.2s;
+}
+
+.param-tag:hover {
+  background: rgba(120, 120, 128, 0.18) !important;
+  color: #000000 !important;
+}
+
+/* 黑色 iOS 发送圆圈按钮 */
+.inspector-send-btn {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background: #000000 !important;
+  border: none !important;
+  color: #ffffff !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.inspector-send-btn:hover {
+  transform: scale(1.08) !important;
+  background: #2c2c2e !important;
+}
+
+.inspector-send-btn svg {
+  width: 16px !important;
+  height: 16px !important;
+  stroke: #ffffff !important;
+  fill: none !important;
+}
+
+/* 参数点击触发按钮 */
+.param-tag-btn {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(60, 60, 67, 0.85);
+  background: rgba(120, 120, 128, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 4px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s;
+}
+
+.param-tag-btn:hover,
+.param-tag-btn.is-active {
+  background: rgba(120, 120, 128, 0.2);
+  color: #000;
+}
+
+/* 浮动参数设置弹窗（iOS 亮色毛玻璃拟态风格） */
+.inspector-settings-popover {
+  position: absolute;
+  top: calc(100% + 24px) !important;
+  left: 0 !important;
+  bottom: auto !important;
+  width: 330px;
+  background: rgba(242, 242, 247, 0.92) !important;
+  backdrop-filter: blur(30px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(190%) !important;
+
+  /* 核心修改：改为微淡灰色边框，并去掉 inset 白色高光内阴影 */
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12) !important;
+
+  border-radius: 22px !important;
+  padding: 16px !important;
+  color: #000000 !important;
+  z-index: 300;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "PingFang SC", sans-serif !important;
+  transform-origin: top left;
+  animation: popInDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.popover-section {
+  margin-bottom: 14px;
+}
+
+.popover-section:last-child {
+  margin-bottom: 0;
+}
+
+.popover-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(60, 60, 67, 0.6) !important;
+  margin-bottom: 8px;
+}
+
+.popover-row {
+  display: flex;
+  gap: 8px;
+}
+
+/* 普通按钮 */
+.popover-btn {
+  flex: 1;
+  padding: 8px 0;
+  background: rgba(120, 120, 128, 0.12) !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  border-radius: 12px !important;
+  color: #1c1c1e !important;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.popover-btn:hover {
+  background: rgba(120, 120, 128, 0.2) !important;
+  color: #000000 !important;
+}
+
+.popover-btn.is-active {
+  background: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  color: #000000 !important;
+  font-weight: 600 !important;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.12),
+    0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* 比例 5 列网格 */
+.popover-ratio-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.popover-ratio-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+  background: rgba(120, 120, 128, 0.12) !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  border-radius: 12px !important;
+  color: #1c1c1e !important;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.popover-ratio-btn:hover {
+  background: rgba(120, 120, 128, 0.2) !important;
+  color: #000000 !important;
+}
+
+.popover-ratio-btn.is-active {
+  background: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  color: #000000 !important;
+  font-weight: 600 !important;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.12),
+    0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+
+.ratio-icon {
+  font-size: 14px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.ratio-label {
+  font-size: 11px;
+}
+
+/* 模型配置下拉菜单 (iOS 亮色毛玻璃拟态) */
+.inspector-model-popover {
+  position: absolute;
+  top: calc(100% + 24px) !important;
+  left: 0 !important;
+  bottom: auto !important;
+  width: 320px;
+  background: rgba(242, 242, 247, 0.92) !important;
+  backdrop-filter: blur(30px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(190%) !important;
+
+  /* 核心修改：改为微淡灰色边框，并去掉 inset 白色高光内阴影 */
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12) !important;
+
+  border-radius: 20px !important;
+  padding: 14px 16px !important;
+  color: #000000 !important;
+  z-index: 300;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "PingFang SC", sans-serif !important;
+  transform-origin: top left;
+  animation: popInDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.model-popover-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+}
+
+.model-popover-header .popover-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1c1c1e !important;
+  margin: 0;
+}
+
+.model-popover-header .popover-link {
+  font-size: 12px;
+  color: #666;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.model-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 单个模型条目 */
+.model-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.model-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* 选中模型项：纯白高亮浮动卡片 */
+.model-item.is-selected {
+  background: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.9) !important;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+.model-icon {
+  font-size: 16px;
+  margin-top: 1px;
+}
+
+.model-info {
+  flex: 1;
+}
+
+.model-name-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.model-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
+}
+
+.model-check {
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.model-desc {
+  font-size: 12px;
+  color: rgba(60, 60, 67, 0.7);
+  line-height: 1.4;
+  margin: 0;
+}
+
+@keyframes popInDown {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
